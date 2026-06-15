@@ -7,6 +7,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
+  // Verifica que o cliente pertence ao gestor
+  const { data: cliente } = await supabase
+    .from('clientes')
+    .select('id')
+    .eq('id', params.id)
+    .eq('gestor_id', user.id)
+    .single()
+
+  if (!cliente) return NextResponse.json({ error: 'Cliente não encontrado' }, { status: 404 })
+
   const body = await req.json()
 
   const { data, error } = await supabase

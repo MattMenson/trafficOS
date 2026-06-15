@@ -57,6 +57,21 @@ export default function GastoForm({ open, onClose, onSave, inicial }: Props) {
     },
   })
 
+  // Re-popula o form com os dados do registro correto cada vez que o modal abre
+  useEffect(() => {
+    if (open) {
+      reset({
+        descricao:  inicial?.descricao  || '',
+        categoria:  inicial?.categoria  || 'ferramentas',
+        valor:      inicial?.valor      || undefined,
+        data_gasto: inicial?.data_gasto || new Date().toISOString().split('T')[0],
+        cliente_id: inicial?.cliente_id || '',
+        recorrente: inicial?.recorrente || false,
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, inicial])
+
   const onSubmit = async (data: FormData) => {
     setLoading(true)
     try {

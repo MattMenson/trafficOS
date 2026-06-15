@@ -29,6 +29,7 @@ interface SyncResult {
   dias_totais: number
   erros: number
   sincronizado_em: string
+  error?: string
 }
 
 export function useMetaAccounts() {
@@ -54,7 +55,7 @@ export function useMetaAccounts() {
 
   useEffect(() => { fetch() }, [fetch])
 
-  const sincronizar = async (accountId?: string) => {
+  const sincronizar = async (accountId?: string): Promise<SyncResult> => {
     setSyncing(true)
     try {
       const res = await window.fetch('/api/meta/sync', {
@@ -63,8 +64,25 @@ export function useMetaAccounts() {
         body: JSON.stringify(accountId ? { account_id: accountId } : {}),
       })
       const result = await res.json()
+      if (!res.ok) {
+        const failed: SyncResult = {
+          ok: false, contas: 0, dias_totais: 0, erros: 1,
+          sincronizado_em: new Date().toISOString(),
+          error: result?.error || 'Erro ao sincronizar',
+        }
+        setLastSync(failed)
+        return failed
+      }
       setLastSync(result)
       return result
+    } catch (e) {
+      const failed: SyncResult = {
+        ok: false, contas: 0, dias_totais: 0, erros: 1,
+        sincronizado_em: new Date().toISOString(),
+        error: e instanceof Error ? e.message : 'Erro de conexão ao sincronizar',
+      }
+      setLastSync(failed)
+      return failed
     } finally {
       setSyncing(false)
     }

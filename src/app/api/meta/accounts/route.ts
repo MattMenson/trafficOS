@@ -31,6 +31,18 @@ export async function PATCH(req: NextRequest) {
 
   const { account_id, cliente_id } = await req.json()
 
+  // Se um cliente foi informado, verifica que ele pertence ao gestor
+  if (cliente_id) {
+    const { data: cliente } = await supabase
+      .from('clientes')
+      .select('id')
+      .eq('id', cliente_id)
+      .eq('gestor_id', user.id)
+      .single()
+
+    if (!cliente) return NextResponse.json({ error: 'Cliente não encontrado' }, { status: 404 })
+  }
+
   const { data, error } = await supabase
     .from('meta_ad_accounts')
     .update({ cliente_id: cliente_id || null })

@@ -267,9 +267,6 @@ export default function ClienteDetalhe({ params }: { params: { id: string } }) {
         <Card>
           <div className="flex items-center justify-between p-4 border-b border-gray-100">
             <p className="text-sm font-medium text-gray-700">Entregas</p>
-            <Link href="/ideias">
-              <Button size="sm">Gerenciar entregas</Button>
-            </Link>
           </div>
           {cliente.entregas && cliente.entregas.length > 0 ? (
             <table className="w-full text-sm">

@@ -211,7 +211,7 @@ export default function MetaPage() {
     if (result.ok) {
       showToast(`Sincronizado! ${result.dias_totais} dias de dados atualizados.`, 'ok')
     } else {
-      showToast(`${result.erros} conta(s) com erro ao sincronizar.`, 'erro')
+      showToast(result.error || `${result.erros} conta(s) com erro ao sincronizar.`, 'erro')
     }
   }
 
@@ -385,7 +385,14 @@ export default function MetaPage() {
                           account={account}
                           clientes={clientes}
                           onVincular={vincularCliente}
-                          onSincronizar={async () => { await sincronizar(account.id) }}
+                          onSincronizar={async () => {
+                            const result = await sincronizar(account.id)
+                            if (result.ok) {
+                              showToast(`Sincronizado! ${result.dias_totais} dias de dados atualizados.`, 'ok')
+                            } else {
+                              showToast(result.error || `${result.erros} conta(s) com erro ao sincronizar.`, 'erro')
+                            }
+                          }}
                           expandido={contaExpandida === account.id}
                           onToggle={() => setContaExpandida(
                             contaExpandida === account.id ? null : account.id

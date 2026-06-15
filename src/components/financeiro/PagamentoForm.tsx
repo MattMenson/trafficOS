@@ -32,7 +32,7 @@ export default function PagamentoForm({ open, onClose, onSave, inicial }: Props)
   const isEdit = Boolean(inicial?.id)
 
   useEffect(() => {
-    window.fetch('/api/clientes?status=ativo')
+    window.fetch('/api/clientes')
       .then(r => r.json())
       .then(data => setClientes(data || []))
   }, [])
@@ -49,6 +49,22 @@ export default function PagamentoForm({ open, onClose, onSave, inicial }: Props)
       forma_pagamento: inicial?.forma_pagamento || '',
     },
   })
+
+  // Re-popula o form com os dados do registro correto cada vez que o modal abre
+  useEffect(() => {
+    if (open) {
+      reset({
+        cliente_id:      inicial?.cliente_id      || '',
+        descricao:       inicial?.descricao       || 'Gestão Meta Ads',
+        valor:           inicial?.valor           || undefined,
+        data_vencimento: inicial?.data_vencimento || '',
+        data_pagamento:  inicial?.data_pagamento  || '',
+        status:          inicial?.status          || 'pendente',
+        forma_pagamento: inicial?.forma_pagamento || '',
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, inicial])
 
   const statusWatch = watch('status')
 

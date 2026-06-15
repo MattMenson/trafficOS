@@ -42,6 +42,16 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
 
+  // Verifica que o cliente pertence ao gestor
+  const { data: cliente } = await supabase
+    .from('clientes')
+    .select('id')
+    .eq('id', body.cliente_id)
+    .eq('gestor_id', user.id)
+    .single()
+
+  if (!cliente) return NextResponse.json({ error: 'Cliente não encontrado' }, { status: 404 })
+
   const { data, error } = await supabase
     .from('relatorios')
     .insert({
@@ -66,6 +76,25 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
   const { id } = await req.json()
+  if (!id) return NextResponse.json({ error: 'id obrigatório' }, { status: 400 })
+
+  // Verifica que o relatório pertence a um cliente do gestor
+  const { data: relatorioAtual } = await supabase
+    .from('relatorios')
+    .select('cliente_id')
+    .eq('id', id)
+    .single()
+
+  if (!relatorioAtual) return NextResponse.json({ error: 'Relatório não encontrado' }, { status: 404 })
+
+  const { data: cliente } = await supabase
+    .from('clientes')
+    .select('id')
+    .eq('id', relatorioAtual.cliente_id)
+    .eq('gestor_id', user.id)
+    .single()
+
+  if (!cliente) return NextResponse.json({ error: 'Relatório não encontrado' }, { status: 404 })
 
   const { data, error } = await supabase
     .from('relatorios')

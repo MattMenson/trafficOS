@@ -94,6 +94,10 @@ export function useRelatorios(clienteId?: string) {
       const res = await window.fetch(
         `/api/relatorios/gerar?cliente_id=${rel.clientes.id}&inicio=${rel.periodo_inicio}&fim=${rel.periodo_fim}`
       )
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Erro ao buscar dados')
+      }
       const dados = await res.json()
       const { gerarPDF } = await import('@/components/relatorios/PdfGenerator')
       await gerarPDF(dados)

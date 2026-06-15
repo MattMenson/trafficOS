@@ -7,7 +7,7 @@ interface Alerta {
   urgencia: 'alta' | 'media'
   titulo: string
   subtitulo: string
-  link: string
+  link?: string
 }
 
 interface Props {
@@ -55,14 +55,12 @@ export default function AlertsPanel({ contratosVencendo, pagamentosAtrasados, en
       urgencia:  'alta' as const,
       titulo:    `${e.clientes?.nome} — entrega atrasada`,
       subtitulo: e.titulo,
-      link:      '/ideias',
     })),
     ...tarefasUrgentes.map(t => ({
       tipo:      'tarefa' as const,
       urgencia:  (t.prioridade === 'urgente' ? 'alta' : 'media') as 'alta' | 'media',
       titulo:    t.titulo,
       subtitulo: t.clientes?.nome ? `Cliente: ${t.clientes.nome}` : 'Tarefa geral',
-      link:      '/tarefas',
     })),
   ].sort((a, b) => (a.urgencia === 'alta' ? -1 : 1) - (b.urgencia === 'alta' ? -1 : 1))
 
@@ -78,9 +76,9 @@ export default function AlertsPanel({ contratosVencendo, pagamentosAtrasados, en
 
   return (
     <div className="space-y-2">
-      {alertas.map((a, i) => (
-        <Link href={a.link} key={i}>
-          <div className={`flex items-start gap-3 p-3 rounded-lg border-l-2 cursor-pointer hover:brightness-95 transition-all ${COR[a.urgencia]}`}>
+      {alertas.map((a, i) => {
+        const conteudo = (
+          <div className={`flex items-start gap-3 p-3 rounded-lg border-l-2 transition-all ${COR[a.urgencia]} ${a.link ? 'cursor-pointer hover:brightness-95' : ''}`}>
             <span className="text-base mt-0.5 flex-shrink-0">{ICONE[a.tipo]}</span>
             <div className="flex-1 min-w-0">
               <p className={`text-xs font-medium leading-tight ${COR_TEXTO[a.urgencia]}`}>
@@ -90,10 +88,14 @@ export default function AlertsPanel({ contratosVencendo, pagamentosAtrasados, en
                 {a.subtitulo}
               </p>
             </div>
-            <span className={`text-xs flex-shrink-0 mt-0.5 ${COR_TEXTO[a.urgencia]}`}>→</span>
+            {a.link && <span className={`text-xs flex-shrink-0 mt-0.5 ${COR_TEXTO[a.urgencia]}`}>→</span>}
           </div>
-        </Link>
-      ))}
+        )
+
+        return a.link
+          ? <Link href={a.link} key={i}>{conteudo}</Link>
+          : <div key={i}>{conteudo}</div>
+      })}
     </div>
   )
 }

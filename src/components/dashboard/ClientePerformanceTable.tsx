@@ -29,7 +29,7 @@ export default function ClientePerformanceTable({ clientes }: Props) {
   return (
     <div className="divide-y divide-gray-50">
       {clientes.map(c => {
-        const pct        = Math.round((c.recebido_mes / c.mensalidade) * 100)
+        const pct        = c.mensalidade > 0 ? Math.round((c.recebido_mes / c.mensalidade) * 100) : 0
         const statusPgt  = c.recebido_mes >= c.mensalidade
           ? { color: '#059669', label: 'Pago' }
           : c.recebido_mes > 0

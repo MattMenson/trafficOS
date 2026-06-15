@@ -22,14 +22,26 @@ export default function RelatoriosPage() {
   }
 
   async function handleGerar(clienteId: string, inicio: string, fim: string) {
-    await gerar(clienteId, inicio, fim)
-    setModalAberto(false)
-    showToast('✅ PDF gerado e salvo com sucesso!')
+    try {
+      await gerar(clienteId, inicio, fim)
+      setModalAberto(false)
+      showToast('✅ PDF gerado e salvo com sucesso!')
+    } catch (e) {
+      showToast(`⛔ ${e instanceof Error ? e.message : 'Erro ao gerar relatório'}`)
+    }
   }
 
   async function handleMarcarEnviado(id: string) {
     await marcarEnviado(id)
     showToast('📧 Relatório marcado como enviado')
+  }
+
+  async function handleBaixarNovamente(rel: Parameters<typeof baixarNovamente>[0]) {
+    try {
+      await baixarNovamente(rel)
+    } catch (e) {
+      showToast(`⛔ ${e instanceof Error ? e.message : 'Erro ao gerar PDF'}`)
+    }
   }
 
   // Agrupa por cliente
@@ -164,7 +176,7 @@ export default function RelatoriosPage() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => baixarNovamente(r)}
+                              onClick={() => handleBaixarNovamente(r)}
                               disabled={gerando}
                               title="Baixar PDF"
                             >

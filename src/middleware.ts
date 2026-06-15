@@ -27,6 +27,8 @@ export async function middleware(request: NextRequest) {
 
   const isPublicRoute = request.nextUrl.pathname.startsWith('/login') ||
     request.nextUrl.pathname.startsWith('/cadastro') ||
+    request.nextUrl.pathname.startsWith('/r/') ||
+    request.nextUrl.pathname.startsWith('/api/relatorios/link') ||
     request.nextUrl.pathname === '/'
 
   // Redireciona para login se não autenticado e rota protegida
