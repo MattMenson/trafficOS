@@ -5,17 +5,18 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { clsx } from 'clsx'
 import {
-  LayoutDashboard, Users, Wallet, Receipt, Megaphone, FileBarChart, Menu, X, LogOut,
+  LayoutDashboard, Users, Wallet, Receipt, Megaphone, FileBarChart, BarChart2, Menu, X, LogOut,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar } from '@/components/ui'
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/clientes', label: 'Clientes', icon: Users },
+  { href: '/clientes',  label: 'Clientes',  icon: Users },
   { href: '/financeiro', label: 'Financeiro', icon: Wallet },
-  { href: '/gastos', label: 'Gastos', icon: Receipt },
-  { href: '/meta', label: 'Meta Ads', icon: Megaphone },
+  { href: '/gastos',    label: 'Gastos',    icon: Receipt },
+  { href: '/meta',      label: 'Meta Ads',  icon: Megaphone },
+  { href: '/analise',   label: 'Análise',   icon: BarChart2 },
   { href: '/relatorios', label: 'Relatórios', icon: FileBarChart },
 ]
 
