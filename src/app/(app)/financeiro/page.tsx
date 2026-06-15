@@ -34,7 +34,7 @@ export default function FinanceiroPage() {
   const [filtroStatus, setFiltroStatus]     = useState('')
 
   const { pagamentos, loading, criar, atualizar, marcarPago, remover } = usePagamentos({ mes: mesSelecionado })
-  const { resumo } = useResumoFinanceiro(mesSelecionado)
+  const { resumo, refetch: refetchResumo } = useResumoFinanceiro(mesSelecionado)
 
   // Gera lista dos últimos 6 meses para o seletor
   const meses = useMemo(() => {
@@ -60,6 +60,17 @@ export default function FinanceiroPage() {
     }
     setModalAberto(false)
     setPagamentoEdit(null)
+    refetchResumo()
+  }
+
+  async function handleMarcarPago(id: string) {
+    await marcarPago(id)
+    refetchResumo()
+  }
+
+  async function handleRemover(id: string) {
+    await remover(id)
+    refetchResumo()
   }
 
   function abrirEdicao(p: Pagamento) {
@@ -247,7 +258,7 @@ export default function FinanceiroPage() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => marcarPago(p.id)}
+                          onClick={() => handleMarcarPago(p.id)}
                           className="text-emerald-700 hover:bg-emerald-50 text-xs"
                         >
                           ✓ Pago
@@ -259,7 +270,7 @@ export default function FinanceiroPage() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => { if (confirm('Remover este pagamento?')) remover(p.id) }}
+                        onClick={() => { if (confirm('Remover este pagamento?')) handleRemover(p.id) }}
                         className="text-red-500 hover:bg-red-50"
                       >
                         ✕
