@@ -52,6 +52,15 @@ npm run dev
 
 Acesse [http://localhost:3000](http://localhost:3000)
 
+### 5. Ativar sincronização automática (produção, na Vercel)
+
+Não é obrigatório em dev, mas necessário pra sincronização rodar sozinha em produção (`vercel.json` já define o cron):
+
+1. Gere um valor aleatório para `CRON_SECRET` (ex: `openssl rand -hex 32`)
+2. Cadastre `CRON_SECRET` em **Vercel → Project → Settings → Environment Variables**
+3. Faça o deploy. A Vercel passa a chamar `/api/cron/sync-meta` sozinha, no horário definido em `vercel.json` (padrão: a cada 6 horas)
+4. No plano **Hobby** da Vercel, cron só roda 1x por dia — troque o `schedule` em `vercel.json` para `"0 6 * * *"` nesse caso. No plano **Pro**, intervalos menores (ex: `0 */6 * * *`) funcionam normalmente.
+
 ---
 
 ## Estrutura do projeto
@@ -82,9 +91,11 @@ trafficOS/
 │   │   │   ├── ideias/page.tsx
 │   │   │   └── tarefas/page.tsx
 │   │   └── api/
+│   │       ├── cron/
+│   │       │   └── sync-meta/route.ts # Sincronização automática (Vercel Cron)
 │   │       ├── meta/
 │   │       │   ├── callback/route.ts  # OAuth callback
-│   │       │   ├── sync/route.ts      # Sincroniza métricas
+│   │       │   ├── sync/route.ts      # Sincroniza métricas (manual, por usuário)
 │   │       │   └── accounts/route.ts
 │   │       └── relatorios/
 │   │           └── pdf/route.ts
@@ -92,7 +103,8 @@ trafficOS/
 │   ├── lib/
 │   │   ├── supabase/
 │   │   │   ├── client.ts              # Client-side Supabase
-│   │   │   └── server.ts              # Server-side Supabase
+│   │   │   ├── server.ts              # Server-side Supabase (sessão do usuário)
+│   │   │   └── admin.ts               # Service role Supabase (cron, bypassa RLS)
 │   │   └── meta-api.ts                # Meta Marketing API
 │   │
 │   ├── types/
@@ -139,12 +151,15 @@ Sistema valida token e busca contas de anúncio
           ↓
 Gestor vincula cada conta a um cliente
           ↓
-Sincronização diária automática (via API Route + cron)
+Sincronização automática via Vercel Cron (/api/cron/sync-meta)
+roda sozinha em produção, sem precisar de clique
           ↓
 Métricas salvas em meta_metricas (cache local)
           ↓
 Dashboard e relatórios consomem o cache
 ```
+
+O botão "Sincronizar tudo" na página Meta Ads continua disponível pra forçar uma atualização imediata, mas deixou de ser obrigatório: o cron cuida disso sozinho em produção.
 
 ---
 
@@ -165,7 +180,7 @@ Dashboard e relatórios consomem o cache
 - [x] Middleware de autenticação
 - [ ] Módulo de clientes (CRUD completo)
 - [ ] Módulo financeiro
-- [ ] Sincronização Meta API (API Route + cron)
+- [x] Sincronização Meta API (API Route + cron)
 - [ ] Dashboard com dados reais
 - [ ] Geração de relatórios PDF
 - [ ] Notificações (contratos vencendo, budget esgotado)

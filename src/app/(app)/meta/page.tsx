@@ -409,7 +409,8 @@ export default function MetaPage() {
           {/* Como funciona */}
           <div className="bg-gray-50 rounded-xl p-5 text-xs text-gray-500 space-y-1.5">
             <p className="font-medium text-gray-700 mb-2">Como funciona a sincronização</p>
-            <p>↻ <strong>Sincronizar tudo</strong> — busca os dados do mês atual de todas as contas ativas.</p>
+            <p>🤖 <strong>Automática</strong> — em produção, o sistema busca os dados sozinho em segundo plano, sem precisar clicar em nada.</p>
+            <p>↻ <strong>Sincronizar tudo</strong> — força uma atualização imediata do mês atual de todas as contas ativas.</p>
             <p>↻ <strong>Botão por conta</strong> — sincroniza só aquela conta, mais rápido.</p>
             <p>📊 <strong>Métricas</strong> — clique em "▼ Métricas" em contas vinculadas a um cliente para ver o painel.</p>
             <p>🔑 <strong>Token</strong> — o acesso dura 60 dias. Reconecte antes do vencimento para renovar automaticamente.</p>
