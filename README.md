@@ -25,14 +25,33 @@ Sistema completo para gestão de clientes, financeiro, campanhas Meta Ads e rela
    - `anon public` → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `service_role` → `SUPABASE_SERVICE_ROLE_KEY`
 
-### 2. Configurar App no Meta for Developers
+### 2. Conectar contas Meta (duas formas, escolha uma)
 
-1. Acesse [developers.facebook.com](https://developers.facebook.com) e crie um app do tipo **Business**
-2. Adicione o produto **Marketing API**
-3. Em **Configurações do App → Básico**, copie:
+A Meta exige, sem exceção, um app criado em developers.facebook.com pra gerar qualquer token de acesso à Marketing API — não existe forma de pular essa etapa (nem ferramentas como Adveronix ou UTMify escapam disso, elas só usam o app delas em vez do seu). O que dá pra escolher é o quanto dessa complexidade entra na configuração do TrafficOS.
+
+**Opção A — Colar token manualmente (mais simples, recomendada)**
+
+Não usa OAuth, não precisa de App Secret nem de URI de redirect configurada em lugar nenhum.
+
+1. Acesse [developers.facebook.com](https://developers.facebook.com) → crie um app tipo **Business** (leva 2 minutos, sem App Review necessário pra uso próprio)
+2. Adicione o produto **Marketing API** ao app
+3. Vá em [business.facebook.com](https://business.facebook.com) → **Configurações do negócio → Usuários → Usuários do sistema**
+4. Clique **Adicionar**, crie um system user, depois **Gerar novo token**
+5. Selecione o app criado no passo 1 e marque as permissões: `ads_read`, `ads_management`, `business_management`, `read_insights`
+6. Copie o token gerado (token de system user não expira, ao contrário do token de usuário comum que dura 60 dias)
+7. Na página **Meta Ads** do TrafficOS, clique em **"Colar token manualmente"** e informe o ID do Business Manager + o token
+
+Não precisa de nenhuma das variáveis `NEXT_PUBLIC_META_APP_ID`, `META_APP_SECRET` ou `NEXT_PUBLIC_META_REDIRECT_URI` nesse caminho.
+
+**Opção B — Login com Facebook (OAuth, um clique pro usuário final)**
+
+Melhor se vários gestores forem usar o sistema e você quiser que cada um conecte a própria conta sem lidar com token manualmente.
+
+1. No mesmo app criado acima, vá em **Facebook Login → Configurações**
+2. Em **Configurações do App → Básico**, copie:
    - `ID do Aplicativo` → `NEXT_PUBLIC_META_APP_ID`
    - `Chave Secreta do Aplicativo` → `META_APP_SECRET`
-4. Em **Facebook Login → Configurações**, adicione a URI de redirecionamento:
+3. Em **Facebook Login → Configurações**, adicione a URI de redirecionamento:
    - Dev: `http://localhost:3000/api/meta/callback`
    - Produção: `https://seudominio.com/api/meta/callback`
 

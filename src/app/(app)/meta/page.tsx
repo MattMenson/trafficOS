@@ -176,11 +176,77 @@ function AdAccountCard({
 }
 
 // -------------------------------------------------------
+// Formulário de conexão manual (BM ID + Access Token)
+// Alternativa ao OAuth — não exige App ID / App Secret / redirect URI.
+// -------------------------------------------------------
+function ConexaoManualForm({
+  onConectar,
+  onFechar,
+}: {
+  onConectar: (bmId: string, token: string) => Promise<{ ok: boolean; error?: string; contas?: number }>
+  onFechar: () => void
+}) {
+  const [bmId, setBmId]     = useState('')
+  const [token, setToken]   = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const [erro, setErro]     = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setEnviando(true)
+    setErro(null)
+    const result = await onConectar(bmId.trim(), token.trim())
+    setEnviando(false)
+    if (!result.ok) {
+      setErro(result.error || 'Erro ao conectar')
+      return
+    }
+    onFechar()
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3 text-sm">
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">ID do Business Manager</label>
+        <input
+          value={bmId}
+          onChange={e => setBmId(e.target.value)}
+          placeholder="Ex: 123456789012345"
+          required
+          className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Access Token</label>
+        <input
+          value={token}
+          onChange={e => setToken(e.target.value)}
+          placeholder="Gerado em Business Settings → System Users → Generate Token"
+          required
+          type="password"
+          className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
+        />
+      </div>
+      {erro && <p className="text-xs text-red-600">{erro}</p>}
+      <div className="flex gap-2">
+        <Button type="submit" variant="primary" disabled={enviando} className="text-xs">
+          {enviando ? 'Validando...' : 'Conectar'}
+        </Button>
+        <Button type="button" variant="ghost" onClick={onFechar} className="text-xs">
+          Cancelar
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+// -------------------------------------------------------
 // PÁGINA PRINCIPAL
 // -------------------------------------------------------
 export default function MetaPage() {
   const searchParams = useSearchParams()
-  const { bms, loading, syncing, lastSync, totalContas, contasVinculadas, sincronizar, vincularCliente, desconectar } = useMetaAccounts()
+  const { bms, loading, syncing, lastSync, totalContas, contasVinculadas, sincronizar, vincularCliente, desconectar, conectarManual } = useMetaAccounts()
+  const [mostrarConexaoManual, setMostrarConexaoManual] = useState(false)
 
   const [clientes, setClientes]         = useState<Array<{ id: string; nome: string }>>([])
   const [contaExpandida, setContaExpandida] = useState<string | null>(null)
@@ -221,6 +287,16 @@ export default function MetaPage() {
     showToast('Business Manager desconectado.', 'ok')
   }
 
+  async function handleConectarManual(bmId: string, token: string) {
+    const result = await conectarManual(bmId, token)
+    if (result.ok) {
+      showToast(`Conectado! ${result.contas} conta(s) de anúncio importada(s).`, 'ok')
+    } else {
+      showToast(result.error || 'Erro ao conectar', 'erro')
+    }
+    return result
+  }
+
   const tokenExpirando = bms.some(bm => {
     if (!bm.token_expira_em) return false
     const diasRestantes = Math.ceil((new Date(bm.token_expira_em).getTime() - Date.now()) / 86400000)
@@ -259,8 +335,20 @@ export default function MetaPage() {
               {totalContas > 0 ? 'Adicionar conta' : 'Conectar com Facebook'}
             </Button>
           </a>
+          <Button variant="ghost" className="text-xs" onClick={() => setMostrarConexaoManual(v => !v)}>
+            {mostrarConexaoManual ? 'Cancelar' : 'Colar token manualmente'}
+          </Button>
         </div>
       </div>
+
+      {mostrarConexaoManual && (
+        <div className="mb-6">
+          <ConexaoManualForm
+            onConectar={handleConectarManual}
+            onFechar={() => setMostrarConexaoManual(false)}
+          />
+        </div>
+      )}
 
       {/* Alerta de token expirando */}
       {tokenExpirando && (
@@ -316,6 +404,16 @@ export default function MetaPage() {
               Entrar com Facebook
             </Button>
           </a>
+          <p className="text-xs text-gray-400 mt-4">
+            Não quer configurar app no Meta for Developers?{' '}
+            <button
+              type="button"
+              onClick={() => setMostrarConexaoManual(true)}
+              className="text-gray-600 underline hover:text-gray-900"
+            >
+              Cole um token manualmente
+            </button>
+          </p>
         </div>
       ) : (
         /* Lista de BMs conectados */

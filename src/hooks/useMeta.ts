@@ -108,6 +108,18 @@ export function useMetaAccounts() {
     setBms(prev => prev.filter(b => b.id !== bmId))
   }
 
+  const conectarManual = async (bmIdMeta: string, accessToken: string): Promise<{ ok: boolean; error?: string; contas?: number }> => {
+    const res = await window.fetch('/api/meta/connect-manual', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bm_id: bmIdMeta, access_token: accessToken }),
+    })
+    const result = await res.json()
+    if (!res.ok) return { ok: false, error: result?.error || 'Erro ao conectar' }
+    await fetch()
+    return { ok: true, contas: result.contas }
+  }
+
   const totalContas = bms.reduce((s, bm) => s + bm.meta_ad_accounts.length, 0)
   const contasVinculadas = bms.reduce(
     (s, bm) => s + bm.meta_ad_accounts.filter(a => a.cliente_id).length, 0
@@ -125,6 +137,7 @@ export function useMetaAccounts() {
     sincronizar,
     vincularCliente,
     desconectar,
+    conectarManual,
   }
 }
 
